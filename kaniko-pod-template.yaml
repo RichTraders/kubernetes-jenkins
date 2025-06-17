@@ -1,0 +1,28 @@
+kind: Pod
+metadata:
+  labels:
+    jenkins: kaniko-agent
+spec:
+  serviceAccountName: jenkins      # Jenkins 컨트롤러가 쓰는 SA (RBAC 완료된 것)
+  containers:
+    - name: jnlp
+      image: jenkins/inbound-agent:latest
+      tty: true
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:debug
+      command: ["sleep", "infinity"]
+      tty: true
+      volumeMounts:
+        - name: kaniko-secret
+          mountPath: /kaniko/.docker
+    - name: helm 
+      image: alpine/helm:3.15.1
+      command: ["sleep","infinity"]
+      tty: true
+  volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: kaniko-secret 
+        items:
+        - key: config.json
+          path: config.json
